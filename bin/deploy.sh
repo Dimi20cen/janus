@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="/srv/stacks/personal-auth"
+REPO_DIR="/srv/stacks/janus"
 LOCK_DIR="/tmp/janus-deploy.lock"
 
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
