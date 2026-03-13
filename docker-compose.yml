@@ -1,0 +1,11 @@
+services:
+  personal-auth:
+    build: .
+    container_name: personal-auth
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${LAN_BIND_IP:-127.0.0.1}:${LAN_BIND_PORT:-8100}:8100"
+    volumes:
+      - ./runtime:/app/runtime

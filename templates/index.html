@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Auth</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main class="shell">
+        <section class="hero panel">
+            <p class="eyebrow">Shared Infra</p>
+            <h1>Personal Auth</h1>
+            <p class="lede">A tiny shared OAuth service for private apps on dimy.dev.</p>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Google</p>
+                    <h2>{{ "Connected" if google.connected else "Not connected" }}</h2>
+                </div>
+                {% if google.connected %}
+                <span class="status-chip connected">{{ google.email }}</span>
+                {% else %}
+                <span class="status-chip muted">No account linked</span>
+                {% endif %}
+            </div>
+
+            {% if google.connected %}
+            <p class="muted-copy">Scopes: {{ ", ".join(google.scopes) }}</p>
+            <form action="/oauth/google/disconnect/browser" method="post">
+                <button class="button secondary" type="submit">Disconnect Google</button>
+            </form>
+            {% else %}
+            <p class="muted-copy">Use this to connect a personal Google account for private apps like Jobby and HQ.</p>
+            <form action="/oauth/google/start/browser" method="post" class="stack">
+                <input type="hidden" name="app_name" value="auth-ui">
+                <input type="hidden" name="scopes" value="{{ default_scopes }}">
+                <label>
+                    <span>Return URL (optional)</span>
+                    <input type="url" name="return_url" placeholder="https://jobby.dimy.dev/settings">
+                </label>
+                <button class="button" type="submit">Connect Google</button>
+            </form>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
