@@ -51,17 +51,18 @@ def home(db: Session = Depends(get_db)) -> HTMLResponse:
     payload = status_payload(db)
     google = payload["google"]
     default_scopes = quote("openid email profile https://www.googleapis.com/auth/gmail.readonly")
-    return_url = quote("")
     email = google["email"] or "No account linked"
     if google["connected"]:
         body = f"""
         <p class="muted-copy">Scopes: {", ".join(google["scopes"])}</p>
-        <a class="button secondary" href="/oauth/google/disconnect/browser">Disconnect Google</a>
+        <form action="/oauth/google/disconnect/browser" method="post">
+          <button class="button secondary" type="submit">Disconnect Google</button>
+        </form>
         """
     else:
         body = f"""
         <p class="muted-copy">Use this to connect a personal Google account for private apps like Jobby and HQ.</p>
-        <a class="button" href="/oauth/google/start/browser?app_name=auth-ui&scopes={default_scopes}&return_url={return_url}">Connect Google</a>
+        <a class="button" href="/oauth/google/start/browser?app_name=auth-ui&scopes={default_scopes}">Connect Google</a>
         """
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -129,9 +130,14 @@ def google_disconnect(db: Session = Depends(get_db)) -> DisconnectResponse:
     return DisconnectResponse(disconnected=True)
 
 
-@app.get("/oauth/google/disconnect/browser")
+@app.post("/oauth/google/disconnect/browser")
 def google_disconnect_browser(db: Session = Depends(get_db)) -> RedirectResponse:
     disconnect_google(db)
+    return RedirectResponse("/", status_code=303)
+
+
+@app.get("/oauth/google/disconnect/browser")
+def google_disconnect_browser_get() -> RedirectResponse:
     return RedirectResponse("/", status_code=303)
 
 
