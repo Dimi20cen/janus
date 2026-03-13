@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="/srv/stacks/personal-auth"
-LOCK_DIR="/tmp/personal-auth-deploy.lock"
+LOCK_DIR="/tmp/janus-deploy.lock"
 
 if ! mkdir "$LOCK_DIR" 2>/dev/null; then
   echo "Deploy already running. Exiting."
@@ -12,7 +12,7 @@ trap 'rmdir "$LOCK_DIR"' EXIT
 
 cd "$REPO_DIR"
 
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting personal-auth deploy..."
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting Janus deploy..."
 /usr/bin/git pull --ff-only
 /usr/bin/docker compose up -d --build
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] personal-auth deploy complete."
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Janus deploy complete."

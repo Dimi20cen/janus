@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "personal-auth"
+name = "janus"
 version = "0.1.0"
 description = "Shared OAuth service for dimy personal apps"
 requires-python = ">=3.12"

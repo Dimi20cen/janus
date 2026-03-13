@@ -233,7 +233,7 @@ def _ensure_google_config() -> None:
 
 def _require_service_token(service_token: str) -> None:
     if not config.AUTH_SERVICE_TOKEN:
-        raise HTTPException(status_code=500, detail="AUTH_SERVICE_TOKEN is not configured on personal-auth.")
+        raise HTTPException(status_code=500, detail="AUTH_SERVICE_TOKEN is not configured on Janus.")
     if not hmac.compare_digest(service_token, config.AUTH_SERVICE_TOKEN):
         raise HTTPException(status_code=401, detail="Invalid auth service token.")
 

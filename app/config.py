@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-APP_ID = os.getenv("AUTH_APP_ID", "personal-auth")
+APP_ID = os.getenv("AUTH_APP_ID", "janus")
 PUBLIC_BASE_URL = os.getenv("AUTH_PUBLIC_BASE_URL", "http://127.0.0.1:8100").rstrip("/")
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{Path('./runtime/auth.db').resolve()}")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")

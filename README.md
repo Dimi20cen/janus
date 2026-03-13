@@ -1,4 +1,4 @@
-# personal-auth
+# Janus
 
 Tiny shared OAuth service for private apps on `auth.dimy.dev`.
 
@@ -13,7 +13,7 @@ Tiny shared OAuth service for private apps on `auth.dimy.dev`.
 
 Copy `.env.example` to `.env` and fill in:
 
-- `AUTH_APP_ID`
+- `AUTH_APP_ID` (default: `janus`)
 - `AUTH_PUBLIC_BASE_URL`
 - `DATABASE_URL`
 - `GOOGLE_CLIENT_ID`

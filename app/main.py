@@ -27,7 +27,7 @@ from app.service import (
 
 BASE_DIR = __import__("pathlib").Path(__file__).resolve().parent.parent
 
-app = FastAPI(title="Personal Auth", version="0.1.0")
+app = FastAPI(title="Janus", version="0.1.0")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 
@@ -68,14 +68,14 @@ def home(db: Session = Depends(get_db)) -> HTMLResponse:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personal Auth</title>
+  <title>Janus</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <main class="shell">
     <section class="hero panel">
       <p class="eyebrow">Shared Infra</p>
-      <h1>Personal Auth</h1>
+      <h1>Janus</h1>
       <p class="lede">A tiny shared OAuth service for private apps on dimy.dev.</p>
     </section>
     <section class="panel">

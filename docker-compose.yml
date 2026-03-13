@@ -1,7 +1,7 @@
 services:
-  personal-auth:
+  janus:
     build: .
-    container_name: personal-auth
+    container_name: janus
     restart: unless-stopped
     env_file:
       - .env
