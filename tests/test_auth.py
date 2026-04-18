@@ -185,3 +185,60 @@ def test_google_token_refreshes_expired_token(monkeypatch: pytest.MonkeyPatch) -
         )
         assert token_response.access_token == "refreshed-access-token"
         assert token_response.email == "dim@example.com"
+
+
+def test_google_token_clears_connection_when_refresh_token_is_revoked(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(config, "GOOGLE_CLIENT_ID", "client")
+    monkeypatch.setattr(config, "GOOGLE_CLIENT_SECRET", "secret")
+    monkeypatch.setattr(config, "GOOGLE_REDIRECT_URI", "http://testserver/oauth/google/callback")
+    monkeypatch.setattr(config, "AUTH_SERVICE_TOKEN", "shared-secret")
+
+    with build_session() as db:
+        started = google_start(
+            StartGoogleOAuthRequest(
+                app="jobby",
+                scopes=["openid", "email", "profile", "https://www.googleapis.com/auth/gmail.readonly"],
+                return_url="https://jobby.example/settings",
+            ),
+            db,
+        )
+        state = parse_qs(urlparse(started.auth_url).query)["state"][0]
+
+        def fake_post(url: str, **kwargs):
+            if kwargs["data"]["grant_type"] == "authorization_code":
+                return httpx.Response(
+                    200,
+                    json={
+                        "access_token": "initial-access-token",
+                        "refresh_token": "refresh-token",
+                        "token_type": "Bearer",
+                        "expires_in": 1,
+                        "scope": "openid email profile https://www.googleapis.com/auth/gmail.readonly",
+                    },
+                )
+            return httpx.Response(
+                400,
+                json={
+                    "error": "invalid_grant",
+                    "error_description": "Token has been expired or revoked.",
+                },
+            )
+
+        def fake_get(url: str, **kwargs):
+            assert url == config.GOOGLE_USERINFO_URL
+            return httpx.Response(200, json={"sub": "abc123", "email": "dim@example.com", "name": "Dim"})
+
+        monkeypatch.setattr(service.httpx, "post", fake_post)
+        monkeypatch.setattr(service.httpx, "get", fake_get)
+
+        google_callback("oauth-code", state, db)
+
+        with pytest.raises(Exception) as exc:
+            google_token("https://www.googleapis.com/auth/gmail.readonly", "Bearer shared-secret", db)
+
+        assert exc.value.status_code == 401
+        assert exc.value.detail == "Stored Google token expired or revoked. Reconnect Google."
+
+        status_response = status(db)
+        assert status_response.google.connected is False
+        assert status_response.google.email is None

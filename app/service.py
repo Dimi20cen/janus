@@ -258,7 +258,11 @@ def _ensure_fresh_access_token(db: Session, token: OAuthToken) -> str:
         timeout=30,
     )
     if token_response.status_code >= 400:
-        raise HTTPException(status_code=502, detail=_error_message(token_response, "Google token refresh failed."))
+        detail = _error_message(token_response, "Google token refresh failed.")
+        if _is_revoked_token_error(token_response, detail):
+            _disconnect_account_by_token(db, token)
+            raise HTTPException(status_code=401, detail="Stored Google token expired or revoked. Reconnect Google.")
+        raise HTTPException(status_code=502, detail=detail)
     payload = token_response.json()
     access_token = payload.get("access_token")
     if not access_token:
@@ -290,6 +294,21 @@ def _error_message(response: httpx.Response, fallback: str) -> str:
             if isinstance(payload.get("error"), str):
                 return str(payload["error"])
     return response.text or fallback
+
+
+def _is_revoked_token_error(response: httpx.Response, detail: str) -> bool:
+    if response.status_code not in {400, 401}:
+        return False
+    normalized = detail.lower()
+    return "invalid_grant" in normalized or "expired or revoked" in normalized or "revoked" in normalized
+
+
+def _disconnect_account_by_token(db: Session, token: OAuthToken) -> None:
+    account = db.get(OAuthAccount, token.account_id)
+    db.delete(token)
+    if account is not None:
+        db.delete(account)
+    db.commit()
 
 
 def _base64url(value: bytes) -> str:
